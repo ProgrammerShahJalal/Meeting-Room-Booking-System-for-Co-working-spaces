@@ -1,30 +1,48 @@
-import { Schema, model, Document } from 'mongoose';
-import bcrypt from 'bcryptjs';
+/* eslint-disable @typescript-eslint/no-this-alias */
+import bcrypt from 'bcrypt';
+import { Schema, model } from 'mongoose';
 import config from '../../config';
+import { TUser, UserModel } from './user.interface';
+import { USER_ROLE } from './user.constant';
 
-interface TUser extends Document {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-  address: string;
-  role: 'user' | 'admin';
-}
+const userSchema = new Schema<TUser, UserModel>(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      select: 0,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: Object.values(USER_ROLE),
+      default: USER_ROLE.user,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
-const userSchema = new Schema<TUser>({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  phone: { type: String, required: true },
-  address: { type: String, required: true },
-  role: { type: String, required: true, enum: ['user', 'admin'] },
-});
-
-// Pre-save hook to hash the password before saving the user document
 userSchema.pre('save', async function (next) {
   const user = this; // doc
   // hashing password and save into DB
-
   user.password = await bcrypt.hash(
     user.password,
     Number(config.bcrypt_salt_rounds),
@@ -33,6 +51,20 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-const User = model<TUser>('User', userSchema);
+userSchema.post('save', function (doc, next) {
+  doc.password = '';
+  next();
+});
 
-export default User;
+userSchema.statics.isUserExistsByEmail = async function (email: string) {
+  return await User.findOne({ email }).select('+password');
+};
+
+userSchema.statics.isPasswordMatched = async function (
+  plainTextPassword: string,
+  hashedPassword: string,
+) {
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+
+export const User = model<TUser, UserModel>('User', userSchema);
