@@ -6,7 +6,8 @@ import httpStatus from 'http-status';
 import { USER_ROLE, UserRole } from '../modules/user/user.constant';
 
 const auth =
-  (role: UserRole) => (req: Request, res: Response, next: NextFunction) => {
+  (...allowedRoles: UserRole[]) =>
+  (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -22,7 +23,7 @@ const auth =
       ) as any;
       req.user = decoded;
 
-      if (req.user.role !== role) {
+      if (!allowedRoles.includes(req.user.role)) {
         return next(
           new AppError(httpStatus.FORBIDDEN, 'Insufficient permissions'),
         );
