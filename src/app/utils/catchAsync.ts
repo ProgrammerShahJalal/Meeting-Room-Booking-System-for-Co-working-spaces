@@ -1,9 +1,23 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import { Request, Response, NextFunction } from 'express';
+import AppError from '../errors/AppError';
+import httpStatus from 'http-status';
+import sendResponse from './sendResponse';
 
-const catchAsync = (fn: RequestHandler) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch((err) => next(err));
-  };
-};
+const catchAsync =
+  (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
+    Promise.resolve(fn(req, res, next)).catch((error) => {
+      if (
+        error instanceof AppError &&
+        error.statusCode === httpStatus.NOT_FOUND
+      ) {
+        return sendResponse(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          success: false,
+          message: 'Not Found',
+          data: [],
+        });
+      }
+      next(error);
+    });
 
 export default catchAsync;
