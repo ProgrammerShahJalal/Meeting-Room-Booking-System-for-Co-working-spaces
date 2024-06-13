@@ -21,22 +21,22 @@ This is an Meeting Room Booking System for Co-working spaces application built w
 ## Features
 
 <li>User Signup, Login</li>
-<li>Room creation, only Accessible by Admin</li>
-<li>Retrieving a room</li>
-<li>Retrieving all rooms</li>
-<li> Updating Room (Only Accessible by Admin)</li>
-<li>Deleting a Room (Soft Delete, Only Accessible by Admin)</li>
-<li>Creating Slot (Only Accessible by Admin)</li>
-<li>Getting available slots</li>
-<li>Creating a Booking (Only Accessible by Authenticated User)</li>
-<li>Getting All Bookings (Only Accessible by Admin)</li>
-<li>Getting User's Bookings (Only Accessible by Authenticated User)</li>
-<li>Updating Booking (Only Accessible by Admin)</li>
-<li>Deleting Booking (Soft Delete, Only Accessible by Admin)</li>
-<li>No Data Found</li>
-<li>Error Handling</li>
-<li>Not Found Route</li>
-<li>Authentication Middleware</li>
+<li>✅ Room creation, only Accessible by Admin</li>
+<li>✅ Retrieving a room</li>
+<li>✅ Retrieving all rooms</li>
+<li>✅ Updating Room (Only Accessible by Admin)</li>
+<li>✅ Deleting a Room (Soft Delete, Only Accessible by Admin)</li>
+<li>✅ Creating Slot (Only Accessible by Admin)</li>
+<li>✅ Getting available slots</li>
+<li>✅ Creating a Booking (Only Accessible by Authenticated User)</li>
+<li>✅ Getting All Bookings (Only Accessible by Admin)</li>
+<li>✅ Getting User's Bookings (Only Accessible by Authenticated User)</li>
+<li>✅ Updating Booking (Only Accessible by Admin)</li>
+<li>✅ Deleting Booking (Soft Delete, Only Accessible by Admin)</li>
+<li>✅ No Data Found</li>
+<li>✅ Error Handling</li>
+<li>✅ Not Found Route</li>
+<li>✅ Authentication Middleware</li>
 
 ## Setup Instructions
 
@@ -62,4 +62,5 @@ This is an Meeting Room Booking System for Co-working spaces application built w
    THANK YOU
    <br>
    <br>
-   All rights reserved by Md Shah Jalal.
+
+All rights reserved by Md Shah Jalal.
