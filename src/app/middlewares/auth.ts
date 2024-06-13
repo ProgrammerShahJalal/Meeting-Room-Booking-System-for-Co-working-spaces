@@ -11,7 +11,11 @@ const auth =
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return next(new AppError(httpStatus.UNAUTHORIZED, 'No token provided'));
+      return res.status(httpStatus.UNAUTHORIZED).json({
+        success: false,
+        statusCode: httpStatus.UNAUTHORIZED,
+        message: 'No token provided',
+      });
     }
 
     const token = authHeader.split(' ')[1];
@@ -24,14 +28,20 @@ const auth =
       req.user = decoded;
 
       if (!allowedRoles.includes(req.user.role)) {
-        return next(
-          new AppError(httpStatus.FORBIDDEN, 'Insufficient permissions'),
-        );
+        return res.status(httpStatus.UNAUTHORIZED).json({
+          success: false,
+          statusCode: httpStatus.UNAUTHORIZED,
+          message: 'You have no access to this route',
+        });
       }
 
       next();
     } catch (err) {
-      return next(new AppError(httpStatus.UNAUTHORIZED, 'Invalid token'));
+      return res.status(httpStatus.UNAUTHORIZED).json({
+        success: false,
+        statusCode: httpStatus.UNAUTHORIZED,
+        message: 'Invalid token',
+      });
     }
   };
 
