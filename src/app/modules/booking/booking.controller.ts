@@ -1,145 +1,77 @@
-import { Request, Response, NextFunction } from 'express';
-import Booking from './booking.model';
+import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
-import { Room } from '../room/room.model';
-import AppError from '../../errors/AppError';
-import Slot from '../slot/slot.model';
+import { BookingServices } from './booking.service';
 
-const createBooking = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { date, slots, room, user } = req.body;
+const createBooking = catchAsync(async (req: Request, res: Response) => {
+  const { date, slots, room, user } = req.body;
 
-    // Calculate total amount
-    const roomData = await Room.findById(room);
-    if (!roomData) {
-      return next(new AppError(httpStatus.NOT_FOUND, 'Room not found'));
-    }
-    const totalAmount = roomData.pricePerSlot * slots.length;
+  const newBooking = await BookingServices.createBooking({
+    date,
+    slots,
+    room,
+    user,
+  });
 
-    // Create booking
-    const newBooking = await Booking.create({
-      date,
-      slots,
-      room,
-      user,
-      totalAmount,
-      isConfirmed: 'unconfirmed',
-    });
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Booking created successfully',
+    data: newBooking,
+  });
+});
 
-    newBooking.populate('room');
-    newBooking.populate('slots');
-    newBooking.populate('user');
+const getAllBookings = catchAsync(async (req: Request, res: Response) => {
+  const bookings = await BookingServices.getAllBookings();
 
-    // Update slot statuses
-    await Slot.updateMany({ _id: { $in: slots } }, { isBooked: true });
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'All bookings retrieved successfully',
+    data: bookings,
+  });
+});
 
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Booking created successfully',
-      data: newBooking,
-    });
-  },
-);
+const getUserBookings = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
 
-const getAllBookings = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const bookings = await Booking.find({ isDeleted: false })
-      .populate('room')
-      .populate('slots')
-      .populate('user');
+  const bookings = await BookingServices.getUserBookings(userId);
 
-    if (bookings.length === 0) {
-      sendResponse(res, {
-        statusCode: httpStatus.NOT_FOUND,
-        success: false,
-        message: 'No Data Found',
-        data: [],
-      });
-    }
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'All bookings retrieved successfully',
-      data: bookings,
-    });
-  },
-);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User bookings retrieved successfully',
+    data: bookings,
+  });
+});
 
-const getUserBookings = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user.id;
+const updateBooking = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { isConfirmed } = req.body;
 
-    const bookings = await Booking.find({ user: userId, isDeleted: false })
-      .populate('room')
-      .populate('slots');
+  const updatedBooking = await BookingServices.updateBooking(id, isConfirmed);
 
-    if (bookings.length === 0) {
-      sendResponse(res, {
-        statusCode: httpStatus.NOT_FOUND,
-        success: false,
-        message: 'No Data Found',
-        data: [],
-      });
-    }
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Booking updated successfully',
+    data: updatedBooking,
+  });
+});
 
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'User bookings retrieved successfully',
-      data: bookings,
-    });
-  },
-);
+const deleteBooking = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-const updateBooking = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const { isConfirmed } = req.body;
+  const deletedBooking = await BookingServices.deleteBooking(id);
 
-    const booking = await Booking.findByIdAndUpdate(
-      id,
-      { isConfirmed },
-      { new: true },
-    );
-
-    if (!booking) {
-      return next(new AppError(httpStatus.NOT_FOUND, 'Booking not found'));
-    }
-
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Booking updated successfully',
-      data: booking,
-    });
-  },
-);
-
-const deleteBooking = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-
-    const booking = await Booking.findByIdAndUpdate(
-      id,
-      { isDeleted: true },
-      { new: true },
-    );
-
-    if (!booking) {
-      return next(new AppError(httpStatus.NOT_FOUND, 'Booking not found'));
-    }
-
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Booking deleted successfully',
-      data: booking,
-    });
-  },
-);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Booking deleted successfully',
+    data: deletedBooking,
+  });
+});
 
 export const BookingController = {
   createBooking,

@@ -69,7 +69,7 @@ userSchema.statics.isPasswordMatched = async function (
 
 // Custom transform function to exclude password
 userSchema.set('toJSON', {
-  transform: (doc, ret, options) => {
+  transform: (doc, ret) => {
     delete ret.password;
     return ret;
   },

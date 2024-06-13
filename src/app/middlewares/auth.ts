@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
-import AppError from '../errors/AppError';
 import httpStatus from 'http-status';
-import { USER_ROLE, UserRole } from '../modules/user/user.constant';
+import { UserRole } from '../modules/user/user.constant';
 
 const auth =
   (...allowedRoles: UserRole[]) =>
@@ -24,7 +23,7 @@ const auth =
       const decoded = jwt.verify(
         token,
         config.jwt_access_secret as string,
-      ) as any;
+      ) as JwtPayload;
       req.user = decoded;
 
       if (!allowedRoles.includes(req.user.role)) {

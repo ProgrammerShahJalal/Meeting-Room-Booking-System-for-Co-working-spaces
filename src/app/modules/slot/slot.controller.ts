@@ -1,86 +1,44 @@
-import { Request, Response, NextFunction } from 'express';
-import { createSlotValidationSchema } from './slot.validation';
-
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
-import Slot from './slot.model';
 import sendResponse from '../../utils/sendResponse';
+import { SlotServices } from './slot.service';
+import { Request, Response } from 'express';
 
-const createSlots = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { room, date, startTime, endTime } = req.body;
+const createSlots = catchAsync(async (req: Request, res: Response) => {
+  const slots = await SlotServices.createSlot(req.body);
 
-    // Validate the request body
-    await createSlotValidationSchema.parseAsync(req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Slots created successfully',
+    data: slots,
+  });
+});
 
-    // Convert times to minutes since midnight
-    const startMinutes =
-      parseInt(startTime.split(':')[0]) * 60 +
-      parseInt(startTime.split(':')[1]);
-    const endMinutes =
-      parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1]);
-    const slotDuration = 60; // in minutes
+const getAvailableSlots = catchAsync(async (req: Request, res: Response) => {
+  const { date, roomId } = req.query;
 
-    // Calculate the number of slots
-    const totalDuration = endMinutes - startMinutes;
-    const numSlots = totalDuration / slotDuration;
+  const slots = await SlotServices.getAvailableSlots(
+    date as string,
+    roomId as string,
+  );
 
-    const slots = [];
-    for (let i = 0; i < numSlots; i++) {
-      const slotStartTime = new Date(`${date}T00:00:00.000Z`);
-      slotStartTime.setMinutes(startMinutes + i * slotDuration);
-
-      const slotEndTime = new Date(`${date}T00:00:00.000Z`);
-      slotEndTime.setMinutes(startMinutes + (i + 1) * slotDuration);
-
-      const newSlot = new Slot({
-        room,
-        date,
-        startTime: slotStartTime.toISOString().substr(11, 5),
-        endTime: slotEndTime.toISOString().substr(11, 5),
-        isBooked: false,
-      });
-
-      await newSlot.save();
-      slots.push(newSlot);
-    }
-
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Slots created successfully',
-      data: slots,
+  if (slots.length === 0) {
+    return sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: 'No Data Found',
+      data: [],
     });
-  },
-);
+  }
 
-const getAvailableSlots = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { date, roomId } = req.query;
-
-    const query: any = { isBooked: false };
-    if (date) query.date = date;
-    if (roomId) query.room = roomId;
-
-    const slots = await Slot.find(query).populate('room');
-
-    if (slots.length === 0) {
-      return sendResponse(res, {
-        statusCode: httpStatus.NOT_FOUND,
-        success: false,
-        message: 'No Data Found',
-        data: [],
-      });
-    }
-
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Available slots retrieved successfully',
-      data: slots,
-    });
-  },
-);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Available slots retrieved successfully',
+    data: slots,
+  });
+});
 
 export const SlotController = {
   createSlots,

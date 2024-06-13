@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodSchema } from 'zod';
+import { AnyZodObject } from 'zod';
 
-const validateRequest = (schema: ZodSchema<any>) => {
+const validateRequest = (schema: AnyZodObject) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      // schema.parse(req.body);
+      //here we don't need to parse, we send data here after parseing
       next();
     } catch (error) {
       const errorMessage =

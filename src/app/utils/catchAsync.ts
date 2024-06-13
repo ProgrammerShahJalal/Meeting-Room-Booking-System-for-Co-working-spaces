@@ -3,8 +3,15 @@ import AppError from '../errors/AppError';
 import httpStatus from 'http-status';
 import sendResponse from './sendResponse';
 
+type AsyncRequestHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => Promise<void>;
+
 const catchAsync =
-  (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
+  (fn: AsyncRequestHandler) =>
+  (req: Request, res: Response, next: NextFunction) =>
     Promise.resolve(fn(req, res, next)).catch((error) => {
       if (
         error instanceof AppError &&

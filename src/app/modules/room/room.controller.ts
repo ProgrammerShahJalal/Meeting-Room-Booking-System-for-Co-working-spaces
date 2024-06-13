@@ -5,8 +5,6 @@ import catchAsync from '../../utils/catchAsync';
 import { TRoom } from './room.interface';
 import { RoomServices } from './room.service';
 import sendResponse from '../../utils/sendResponse';
-import { error } from 'console';
-import AppError from '../../errors/AppError';
 
 const createRoom = catchAsync(async (req: Request, res: Response) => {
   const roomData: TRoom = req.body;
