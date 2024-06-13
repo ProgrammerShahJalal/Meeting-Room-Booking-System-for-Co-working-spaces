@@ -4,6 +4,8 @@ This is an Meeting Room Booking System for Co-working spaces application built w
 
 ## Server Live Link: https://meeting-room-booking-gilt.vercel.app/
 
+## Project Overview Video Link: https://youtu.be/2DZPQtZ1baU
+
 ## Technologies Used
 
 <li>Node.js</li>
