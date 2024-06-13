@@ -20,7 +20,7 @@ This is an Meeting Room Booking System for Co-working spaces application built w
 
 ## Features
 
-<li>User Signup, Login</li>
+<li>✅ User Signup, Login</li>
 <li>✅ Room creation, only Accessible by Admin</li>
 <li>✅ Retrieving a room</li>
 <li>✅ Retrieving all rooms</li>
