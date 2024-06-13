@@ -64,6 +64,15 @@ const getAvailableSlots = catchAsync(
 
     const slots = await Slot.find(query).populate('room');
 
+    if (slots.length === 0) {
+      return sendResponse(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        success: false,
+        message: 'No Data Found',
+        data: [],
+      });
+    }
+
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
