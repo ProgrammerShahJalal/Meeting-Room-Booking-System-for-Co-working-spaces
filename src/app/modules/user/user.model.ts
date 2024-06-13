@@ -19,7 +19,7 @@ const userSchema = new Schema<TUser, UserModel>(
     password: {
       type: String,
       required: true,
-      select: 0,
+      select: false,
     },
     phone: {
       type: String,
@@ -66,5 +66,13 @@ userSchema.statics.isPasswordMatched = async function (
 ) {
   return await bcrypt.compare(plainTextPassword, hashedPassword);
 };
+
+// Custom transform function to exclude password
+userSchema.set('toJSON', {
+  transform: (doc, ret, options) => {
+    delete ret.password;
+    return ret;
+  },
+});
 
 export const User = model<TUser, UserModel>('User', userSchema);

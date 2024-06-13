@@ -29,7 +29,6 @@ const createUser = async (userData: TUser) => {
     await session.commitTransaction();
     await session.endSession();
 
-    newUser[0].password = ''; // We can clear password before returning
     return newUser[0];
   } catch (err: any) {
     await session.abortTransaction();
@@ -57,7 +56,6 @@ const loginUser = async ({
     { expiresIn: config.jwt_access_expires_in },
   );
 
-  user.password = ''; // We can clear password before returning
   return { user, token };
 };
 
