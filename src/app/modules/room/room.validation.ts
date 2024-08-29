@@ -12,6 +12,7 @@ const createRoomValidationSchema = z.object({
     .number()
     .min(0, 'Price per slot must be a non-negative number'),
   amenities: z.array(z.string()).nonempty('Amenities must be provided'),
+  imageUrl: z.string().url('Invalid image URL').optional(),
 });
 
 const updateRoomValidationSchema = z.object({
@@ -39,6 +40,7 @@ const updateRoomValidationSchema = z.object({
     .array(z.string())
     .nonempty('Amenities must be provided')
     .optional(),
+  imageUrl: z.string().url('Invalid image URL').optional(),
 });
 
 export { createRoomValidationSchema, updateRoomValidationSchema };

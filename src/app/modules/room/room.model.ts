@@ -7,6 +7,7 @@ interface TRoom {
   capacity: number;
   pricePerSlot: number;
   amenities: string[];
+  imageUrl?: string;
   isDeleted: boolean;
 }
 
@@ -36,6 +37,9 @@ const roomSchema = new Schema<TRoom>(
     amenities: {
       type: [String],
       required: true,
+    },
+    imageUrl: {
+      type: String,
     },
     isDeleted: {
       type: Boolean,
