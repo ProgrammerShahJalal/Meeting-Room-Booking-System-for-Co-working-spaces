@@ -40,6 +40,18 @@ const getAvailableSlots = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getSlotById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const slot = await SlotServices.getSlotById(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Slot retrieved successfully',
+    data: slot,
+  });
+});
+
 const updateSlot = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const updatedSlot = await SlotServices.updateSlot(id, req.body);
@@ -76,6 +88,7 @@ const deleteSlot = catchAsync(async (req: Request, res: Response) => {
 export const SlotController = {
   createSlots,
   getAvailableSlots,
+  getSlotById,
   updateSlot,
   deleteSlot,
 };
