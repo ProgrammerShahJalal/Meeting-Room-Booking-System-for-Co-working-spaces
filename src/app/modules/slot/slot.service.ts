@@ -79,7 +79,7 @@ const getAvailableSlots = async (
 
   return slots;
 };
-// get slot by id
+// get slot by id == solved deploy issue
 const getSlotById = async (id: string): Promise<TSlot> => {
   const slot = await Slot.findById(id).populate('room');
   if (!slot) {
