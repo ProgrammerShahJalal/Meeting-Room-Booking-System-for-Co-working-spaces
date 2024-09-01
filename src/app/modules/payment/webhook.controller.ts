@@ -22,6 +22,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
     );
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Webhook signature verification failed.', errorMessage);
     return res.status(400).send(`Webhook Error: ${errorMessage}`);
   }
 
@@ -30,20 +31,30 @@ const stripeWebhook = async (req: Request, res: Response) => {
 
     const { date, slots, room, user } = session.metadata as any;
 
-    // Create booking in your database
-    const booking = await Booking.create({
-      room: new Types.ObjectId(room),
-      slots: JSON.parse(slots).map(
-        (slotId: string) => new Types.ObjectId(slotId),
-      ),
-      user: new Types.ObjectId(user),
-      date,
-      totalAmount: session.amount_total! / 100, // Stripe amount is in cents
-      isConfirmed: 'confirmed',
-    });
+    try {
+      // Create booking in your database
+      const booking = await Booking.create({
+        room: new Types.ObjectId(room),
+        slots: JSON.parse(slots).map(
+          (slotId: string) => new Types.ObjectId(slotId),
+        ),
+        user: new Types.ObjectId(user),
+        date,
+        totalAmount: session.amount_total! / 100, // Stripe amount is in cents
+        isConfirmed: 'confirmed',
+      });
 
-    // Mark the slots as booked
-    await Slot.updateMany({ _id: { $in: booking.slots } }, { isBooked: true });
+      // Mark the slots as booked
+      await Slot.updateMany(
+        { _id: { $in: booking.slots } },
+        { isBooked: true },
+      );
+
+      console.log('Booking and slot update completed successfully.');
+    } catch (error) {
+      console.error('Error processing Stripe webhook:', error);
+      return res.status(500).send('Webhook processing failed.');
+    }
   }
 
   res.status(200).json({ received: true });
