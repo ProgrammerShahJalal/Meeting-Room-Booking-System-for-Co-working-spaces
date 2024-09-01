@@ -8,4 +8,5 @@ export interface TBooking extends Document {
   totalAmount: number;
   isConfirmed: string;
   isDeleted: boolean;
+  paymentOption: string; // Payment option (e.g., 'stripe', 'cash')
 }

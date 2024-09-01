@@ -9,6 +9,7 @@ const createBookingValidationSchema = z.object({
     slots: z.array(z.string().uuid()),
     room: z.string().uuid(),
     user: z.string().uuid(),
+    paymentOption: z.enum(['stripe', 'cash']),
   }),
 });
 

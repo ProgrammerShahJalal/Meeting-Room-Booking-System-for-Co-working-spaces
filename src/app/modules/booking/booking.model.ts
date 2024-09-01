@@ -13,6 +13,11 @@ const bookingSchema = new Schema<TBooking>({
     default: 'unconfirmed',
   },
   isDeleted: { type: Boolean, default: false },
+  paymentOption: {
+    type: String,
+    enum: ['stripe', 'cash'],
+    required: true,
+  },
 });
 
 const Booking = model<TBooking>('Booking', bookingSchema);

@@ -5,13 +5,14 @@ import httpStatus from 'http-status';
 import { BookingServices } from './booking.service';
 
 const createBooking = catchAsync(async (req: Request, res: Response) => {
-  const { date, slots, room, user } = req.body;
+  const { date, slots, room, user, paymentOption } = req.body;
 
   const newBooking = await BookingServices.createBooking({
     date,
     slots,
     room,
     user,
+    paymentOption, // Pass paymentOption to service
   });
 
   sendResponse(res, {

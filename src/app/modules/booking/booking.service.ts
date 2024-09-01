@@ -10,15 +10,16 @@ interface CreateBookingParams {
   slots: string[];
   room: string;
   user: string;
+  paymentOption: string;
 }
 
 const createBooking = async (
   params: CreateBookingParams,
 ): Promise<TBooking> => {
-  const { date, slots, room, user } = params;
+  const { date, slots, room, user, paymentOption } = params;
 
-  //   // Validate room ID
-  const roomData = await Room?.findById(room);
+  // Validate room ID
+  const roomData = await Room.findById(room);
   if (!roomData) {
     throw new AppError(httpStatus.NOT_FOUND, 'Room not found');
   }
@@ -34,6 +35,7 @@ const createBooking = async (
     user,
     totalAmount,
     isConfirmed: 'unconfirmed',
+    paymentOption,
   });
 
   await newBooking.populate('room');
