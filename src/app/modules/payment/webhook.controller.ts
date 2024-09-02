@@ -32,13 +32,22 @@ const stripeWebhook = async (req: Request, res: Response) => {
 
       const { date, slots, room, user } = session.metadata as any;
       console.log('Metadata:', { date, slots, room, user });
+
+      // Validate and parse slots
+      let parsedSlots: Types.ObjectId[] = [];
+      try {
+        parsedSlots = JSON.parse(slots).map(
+          (slotId: string) => new Types.ObjectId(slotId),
+        );
+      } catch (jsonError) {
+        console.error('Failed to parse slots from metadata:', jsonError);
+        return res.status(400).send(`Webhook Error: Invalid slots data`);
+      }
       try {
         // Create booking in the database
         const booking = await Booking.create({
           room: new Types.ObjectId(room),
-          slots: JSON.parse(slots).map(
-            (slotId: string) => new Types.ObjectId(slotId),
-          ),
+          slots: parsedSlots,
           user: new Types.ObjectId(user),
           date,
           totalAmount: session.amount_total! / 100, // Stripe amount is in cents

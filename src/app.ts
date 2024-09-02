@@ -21,10 +21,10 @@ app.use(
   }),
 );
 
-// Register the Stripe webhook route before the JSON body parser for get raw data
+// Stripe requires the raw body to construct events properly
 app.post(
   '/api/webhook',
-  express.raw({ type: 'application/json' }),
+  bodyParser.raw({ type: 'application/json' }),
   WebhookController.stripeWebhook,
 );
 
