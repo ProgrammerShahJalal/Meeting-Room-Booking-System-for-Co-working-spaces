@@ -13,7 +13,6 @@ const stripeWebhook = async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature'] as string;
 
   let event: Stripe.Event;
-
   try {
     event = stripe.webhooks.constructEvent(
       req.body,
@@ -26,13 +25,14 @@ const stripeWebhook = async (req: Request, res: Response) => {
     return res.status(400).send(`Webhook Error: ${errorMessage}`);
   }
 
+  // Handle successful payment
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
 
     const { date, slots, room, user } = session.metadata as any;
-
+    console.log('session', session);
     try {
-      // Create booking in your database
+      // Create booking in the database
       const booking = await Booking.create({
         room: new Types.ObjectId(room),
         slots: JSON.parse(slots).map(
@@ -42,6 +42,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
         date,
         totalAmount: session.amount_total! / 100, // Stripe amount is in cents
         isConfirmed: 'confirmed',
+        paymentOption: 'stripe',
       });
 
       // Mark the slots as booked

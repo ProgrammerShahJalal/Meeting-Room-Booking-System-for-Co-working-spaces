@@ -8,14 +8,24 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2024-06-20',
 });
 
-console.log('Stripe Secret Key:', process.env.STRIPE_SECRET_KEY);
-
 const createCheckoutSession = catchAsync(
   async (req: Request, res: Response) => {
-    const { date, slots, room, user, totalAmount } = req.body;
+    const { date, slots, room, user } = req.body;
+
+    const lineItems = req?.body?.line_items;
+    const totalAmount = lineItems[0]?.price_data?.unit_amount;
 
     try {
-      // Creating a checkout session with Stripe
+      // Validate totalAmount
+      if (
+        typeof totalAmount !== 'number' ||
+        isNaN(totalAmount) ||
+        totalAmount <= 0
+      ) {
+        console.log('totalAmount: ', totalAmount);
+        throw new Error('Invalid totalAmount: Must be a positive number.');
+      }
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'payment',
@@ -24,9 +34,9 @@ const createCheckoutSession = catchAsync(
             price_data: {
               currency: 'usd',
               product_data: {
-                name: `Room Booking for ${date}`,
+                name: 'Booking',
               },
-              unit_amount: totalAmount * 100, // Stripe expects amounts in cents
+              unit_amount: totalAmount * 100,
             },
             quantity: 1,
           },
@@ -41,12 +51,8 @@ const createCheckoutSession = catchAsync(
         },
       });
 
-      sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Checkout session created successfully',
-        data: { sessionId: session.id },
-      });
+      // Return the session ID to the frontend
+      res.status(200).json({ sessionId: session.id });
     } catch (error) {
       console.error('Error creating checkout session:', error);
       sendResponse(res, {
