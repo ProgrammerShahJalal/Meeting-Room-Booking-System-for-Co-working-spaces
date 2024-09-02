@@ -40,7 +40,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
         ),
         user: new Types.ObjectId(user),
         date,
-        totalAmount: totalAmount! / 100, // Stripe amount is in cents
+        totalAmount,
         isConfirmed: 'confirmed',
         paymentOption: 'stripe',
       });
