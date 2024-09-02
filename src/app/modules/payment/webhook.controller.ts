@@ -56,7 +56,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
         console.log('Booking and slot update completed successfully.');
       } catch (error) {
         console.error('Error processing Stripe webhook:', error);
-        return res.status(500).send(error);
+        return res.status(500).send('Webhook processing failed.');
       }
       break;
     }
