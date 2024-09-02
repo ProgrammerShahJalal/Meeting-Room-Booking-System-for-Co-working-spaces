@@ -15,7 +15,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(
-      req.body,
+      req.body, // This is expected to be a raw body (Buffer)
       sig,
       process.env.STRIPE_WEBHOOK_SECRET as string,
     );

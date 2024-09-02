@@ -4,6 +4,7 @@ import router from './app/routes';
 import bodyParser from 'body-parser';
 import globalErrorHandler from './app/middlewares/globalErrorhandler';
 import notFound from './app/middlewares/notFound';
+import { WebhookController } from './app/modules/payment/webhook.controller';
 
 const app: Application = express();
 
@@ -20,7 +21,14 @@ app.use(
   }),
 );
 
-//parsers
+// Register the Stripe webhook route before the JSON body parser for get raw data
+app.post(
+  '/api/webhook',
+  express.raw({ type: 'application/json' }),
+  WebhookController.stripeWebhook,
+);
+
+// parsers
 app.use(bodyParser.json());
 app.use(express.json());
 
@@ -31,10 +39,10 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Meeting Room Booking System for Co-working spaces 🚀');
 });
 
-//global error handler
+// global error handler
 app.use(globalErrorHandler);
 
-//Not Found
+// Not Found
 app.use(notFound);
 
 export default app;
