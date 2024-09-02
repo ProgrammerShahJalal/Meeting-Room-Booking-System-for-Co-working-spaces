@@ -1,7 +1,7 @@
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import router from './app/routes';
-import bodyParser from 'body-parser';
+// import bodyParser from 'body-parser';
 import globalErrorHandler from './app/middlewares/globalErrorhandler';
 import notFound from './app/middlewares/notFound';
 import { WebhookController } from './app/modules/payment/webhook.controller';
@@ -29,8 +29,8 @@ app.post(
 );
 
 // parsers
-app.use(bodyParser.json());
-app.use(express.json());
+// app.use(bodyParser.json());
+// app.use(express.json());
 
 // application routes
 app.use('/api', router);
