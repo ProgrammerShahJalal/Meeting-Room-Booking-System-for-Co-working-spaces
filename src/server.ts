@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
-import app from "./app";
-import config from "./app/config";
+import mongoose from 'mongoose';
+import app from './app.js';
+import config from './app/config';
 
 async function main() {
   try {
@@ -8,7 +8,7 @@ async function main() {
 
     app.listen(config.port, () => {
       console.log(
-        `Meeting Room Booking System for Co-working spaces app listening on port ${config.port}`
+        `Meeting Room Booking System for Co-working spaces app listening on port ${config.port}`,
       );
     });
   } catch (error) {
