@@ -13,6 +13,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature'] as string;
 
   let event: Stripe.Event;
+
   try {
     event = stripe.webhooks.constructEvent(
       req.body, // This is expected to be a raw body (Buffer)
@@ -25,48 +26,52 @@ const stripeWebhook = async (req: Request, res: Response) => {
     return res.status(400).send(`Webhook Error: ${errorMessage}`);
   }
 
-  // Handle successful payment
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session;
+  switch (event.type) {
+    case 'checkout.session.completed': {
+      const session = event.data.object as Stripe.Checkout.Session;
 
-    const { date, slots, room, user, totalAmount } = session.metadata as any;
+      const { date, slots, room, user } = session.metadata as any;
+      console.log('session', session);
 
-    try {
-      // Create booking in the database
-      const booking = await Booking.create({
-        room: new Types.ObjectId(room),
-        slots: JSON.parse(slots).map(
-          (slotId: string) => new Types.ObjectId(slotId),
-        ),
-        user: new Types.ObjectId(user),
-        date,
-        totalAmount,
-        isConfirmed: 'confirmed',
-        paymentOption: 'stripe',
-      });
+      try {
+        // Create booking in the database
+        const booking = await Booking.create({
+          room: new Types.ObjectId(room),
+          slots: JSON.parse(slots).map(
+            (slotId: string) => new Types.ObjectId(slotId),
+          ),
+          user: new Types.ObjectId(user),
+          date,
+          totalAmount: session.amount_total! / 100, // Stripe amount is in cents
+          isConfirmed: 'confirmed',
+          paymentOption: 'stripe',
+        });
 
-      // Mark the slots as booked
-      await Slot.updateMany(
-        { _id: { $in: booking.slots } },
-        { isBooked: true },
-      );
-
-      console.log('Booking and slot update completed successfully.');
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(
-          'Error processing Stripe webhook:',
-          error.message,
-          error.stack,
+        // Mark the slots as booked
+        await Slot.updateMany(
+          { _id: { $in: booking.slots } },
+          { isBooked: true },
         );
-      } else {
-        console.error('Unexpected error:', error);
+
+        console.log('Booking and slot update completed successfully.');
+      } catch (error) {
+        console.error('Error processing Stripe webhook:', error);
+        return res.status(500).send('Webhook processing failed.');
       }
-      return res.status(500).send('Webhook processing failed.');
+      break;
+    }
+    case 'payment_intent.payment_failed': {
+      const paymentIntentFailed = event.data.object as Stripe.PaymentIntent;
+      console.error('Payment failed for session:', paymentIntentFailed.id);
+      // Handle payment failure logic if necessary
+      break;
+    }
+    default: {
+      console.log(`Unhandled event type ${event.type}`);
     }
   }
 
-  res.status(200).json({ received: true });
+  res.send();
 };
 
 export const WebhookController = {
