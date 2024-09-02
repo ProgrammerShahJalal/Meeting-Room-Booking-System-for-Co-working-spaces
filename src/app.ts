@@ -23,7 +23,7 @@ app.use(
 
 // Register the Stripe webhook route before the JSON body parser for get raw data
 app.post(
-  '/api/webhook',
+  '/webhook',
   express.raw({ type: 'application/json' }),
   WebhookController.stripeWebhook,
 );
