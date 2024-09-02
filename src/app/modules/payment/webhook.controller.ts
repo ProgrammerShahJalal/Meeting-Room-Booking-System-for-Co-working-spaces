@@ -30,7 +30,11 @@ const stripeWebhook = async (req: Request, res: Response) => {
     const session = event.data.object as Stripe.Checkout.Session;
 
     const { date, slots, room, user } = session.metadata as any;
-    console.log('session', session);
+
+    console.log('Webhook event:', event);
+    console.log('Session object:', session);
+    console.log('Session metadata:', session.metadata);
+
     try {
       // Create booking in the database
       const booking = await Booking.create({
