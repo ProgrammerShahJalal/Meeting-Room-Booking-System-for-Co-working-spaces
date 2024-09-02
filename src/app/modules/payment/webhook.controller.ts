@@ -29,11 +29,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    const { date, slots, room, user } = session.metadata as any;
-
-    console.log('Webhook event:', event);
-    console.log('Session object:', session);
-    console.log('Session metadata:', session.metadata);
+    const { date, slots, room, user, totalAmount } = session.metadata as any;
 
     try {
       // Create booking in the database
@@ -44,7 +40,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
         ),
         user: new Types.ObjectId(user),
         date,
-        totalAmount: session.amount_total! / 100, // Stripe amount is in cents
+        totalAmount: totalAmount! / 100, // Stripe amount is in cents
         isConfirmed: 'confirmed',
         paymentOption: 'stripe',
       });

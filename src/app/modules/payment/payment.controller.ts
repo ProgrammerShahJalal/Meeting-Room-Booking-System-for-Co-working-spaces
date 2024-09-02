@@ -48,6 +48,7 @@ const createCheckoutSession = catchAsync(
           slots: JSON.stringify(slots), // Ensure slots are a JSON string
           room,
           user,
+          totalAmount,
         },
       });
 
