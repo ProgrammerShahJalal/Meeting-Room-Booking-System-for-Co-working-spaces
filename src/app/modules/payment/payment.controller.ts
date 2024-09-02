@@ -10,13 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 
 const createCheckoutSession = catchAsync(
   async (req: Request, res: Response) => {
-    const { date, room, user } = req.body;
-    console.log('===================== Request Body ==============');
-    console.log(req?.body);
-
-    const metadata = req?.body?.metadata || 'No metadata provided';
-    console.log('===================== Metadata ==============');
-    console.log(metadata);
+    const { date, slots, room, user } = req.body;
 
     const lineItems = req?.body?.line_items;
     const totalAmount = lineItems[0]?.price_data?.unit_amount;
@@ -28,7 +22,6 @@ const createCheckoutSession = catchAsync(
         isNaN(totalAmount) ||
         totalAmount <= 0
       ) {
-        console.log('totalAmount: ', totalAmount);
         throw new Error('Invalid totalAmount: Must be a positive number.');
       }
 
@@ -47,18 +40,14 @@ const createCheckoutSession = catchAsync(
             quantity: 1,
           },
         ],
-        success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.FRONTEND_URL}/cancel`,
         metadata: {
           date,
-          slots: JSON.stringify([
-            '66d297e938971838028dccba',
-            '66d2994a38971838028dccbf',
-          ]), // Ensure slots are a JSON string
-          // slots: JSON.stringify(['slotId1', 'slotId2']),
+          slots: JSON.stringify(slots), // Ensure slots are a JSON string
           room,
           user,
         },
+        success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       });
 
       // Return the session ID to the frontend
