@@ -31,7 +31,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
       const session = event.data.object as Stripe.Checkout.Session;
 
       const { date, slots, room, user } = session.metadata as any;
-      console.log('session', session);
+      console.log('===Meta Data==', session?.metadata);
 
       try {
         // Create booking in the database
@@ -56,7 +56,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
         console.log('Booking and slot update completed successfully.');
       } catch (error) {
         console.error('Error processing Stripe webhook:', error);
-        return res.status(500).send('Webhook processing failed.');
+        return res.status(500).send(session?.metadata);
       }
       break;
     }
