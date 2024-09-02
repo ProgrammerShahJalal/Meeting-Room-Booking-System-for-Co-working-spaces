@@ -10,7 +10,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 
 const createCheckoutSession = catchAsync(
   async (req: Request, res: Response) => {
-    const { date, slots, room, user } = req.body;
+    const { date, room, user } = req.body;
+    console.log('===================== Request Body ==============');
+    console.log(req?.body);
+
+    const metadata = req?.body?.metadata || 'No metadata provided';
+    console.log('===================== Metadata ==============');
+    console.log(metadata);
 
     const lineItems = req?.body?.line_items;
     const totalAmount = lineItems[0]?.price_data?.unit_amount;
@@ -34,7 +40,7 @@ const createCheckoutSession = catchAsync(
             price_data: {
               currency: 'usd',
               product_data: {
-                name: 'Booking',
+                name: 'Booking Room',
               },
               unit_amount: totalAmount * 100,
             },
@@ -45,7 +51,11 @@ const createCheckoutSession = catchAsync(
         cancel_url: `${process.env.FRONTEND_URL}/cancel`,
         metadata: {
           date,
-          slots: JSON.stringify(slots), // Ensure slots are a JSON string
+          slots: JSON.stringify([
+            '66d297e938971838028dccba',
+            '66d2994a38971838028dccbf',
+          ]), // Ensure slots are a JSON string
+          // slots: JSON.stringify(['slotId1', 'slotId2']),
           room,
           user,
         },
